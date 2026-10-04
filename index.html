@@ -3,77 +3,101 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Layer8 Orientation</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='3' fill='%23d4ff3a'/%3E%3Ctext x='16' y='21' font-family='monospace' font-weight='700' font-size='13' text-anchor='middle' fill='%230b0d04'%3EL8%3C/text%3E%3C/svg%3E">
+  <title>Layer8 Arcade</title>
+  <link rel="icon" href="img/brand/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="hub">
+  <div class="screen">
     <header class="topbar">
       <a class="brand" href="index.html">
-        <span class="brand__mark">L8</span>
-        <span class="brand__crumbs">Layer8 / <span>Orientation</span></span>
+        <img class="brand__mark" src="img/brand/layer8-mark.png" alt="Layer8">
+        <span class="brand__crumb">Orientation <span>Arcade</span></span>
       </a>
       <div class="topbar__spacer"></div>
-      <span class="readout"><span class="live-dot"></span>Local · <strong id="clock">--:--:--</strong></span>
+      <span class="readout"><strong id="clock">--:--:--</strong></span>
+      <img class="pesu" src="img/brand/pesu.png" alt="PES University">
     </header>
 
     <main class="hub__main">
       <section>
-        <div class="label">Cybersecurity club · <b>field games</b></div>
-        <h1 class="hub__title">LAYER<em>8</em></h1>
-        <div class="hub__lede">
-          <p>Two stations. <strong>One operator runs the laptop</strong>, the player reads the screen and answers out loud.</p>
-        </div>
+        <img class="hero__logo logo-glow" src="img/brand/layer8-wordmark.png" alt="Layer8">
+        <div class="hero__sub neon-pink glitch" data-text="ORIENTATION ARCADE">ORIENTATION ARCADE</div>
+        <div class="hero__tag">PES University cybersecurity club · pick a cabinet</div>
       </section>
 
-      <nav class="modules">
-        <a class="module frame" href="cracker.html">
-          <div class="module__head">
-            <span class="label">Module <b>01</b></span>
-            <span class="label">2:00 · 4 digits</span>
-          </div>
-          <div class="module__preview" aria-hidden="true">02:00</div>
-          <div class="module__foot">
+      <nav class="carts" id="carts">
+        <div class="cart-wrap" style="--edge: var(--cyan)">
+          <a class="cart panel" href="cracker.html" style="--edge: var(--cyan)">
+            <div class="cart__head">
+              <span class="label">Game <b>01</b> · 2:00 · 4 digits</span>
+              <span class="cart__cursor">◀ P1</span>
+            </div>
+            <div class="cart__screen">02:00</div>
             <div>
               <h2>Password Cracker</h2>
               <p>Read the clues, work out the vault code, crack it before the clock hits zero.</p>
             </div>
-            <span class="module__go" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </span>
-          </div>
-        </a>
+          </a>
+        </div>
 
-        <a class="module frame" href="realfake.html">
-          <div class="module__head">
-            <span class="label">Module <b>02</b></span>
-            <span class="label">10s · A / B</span>
-          </div>
-          <div class="module__preview" aria-hidden="true">A ? B</div>
-          <div class="module__foot">
+        <div class="cart-wrap" style="--edge: var(--pink)">
+          <a class="cart panel" href="realfake.html" style="--edge: var(--pink)">
+            <div class="cart__head">
+              <span class="label">Game <b>02</b> · 10 sec · A / B</span>
+              <span class="cart__cursor">◀ P1</span>
+            </div>
+            <div class="cart__screen">A?B</div>
             <div>
               <h2>Real or Fake</h2>
               <p>Two logos or two links. One is a fake. Spot the real one in ten seconds.</p>
             </div>
-            <span class="module__go" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </span>
-          </div>
-        </a>
+          </a>
+        </div>
       </nav>
     </main>
 
     <footer class="hub__foot">
-      <span class="label">Runs offline · no network required</span>
-      <span class="label">F11 for full screen</span>
+      <span class="label">© Layer8 · PES University</span>
+      <span class="press-start blink">Press ↵ to start</span>
+      <span class="label">Free play</span>
     </footer>
   </div>
 
   <script src="js/common.js"></script>
+  <script src="js/fx.js"></script>
   <script>
-    L8.startClock(document.getElementById("clock"));
-    document.querySelectorAll(".module h2").forEach(function (h) { L8.scramble(h, h.textContent, 700); });
+    (function () {
+      FX.init();
+      L8.startClock(document.getElementById("clock"));
+
+      // arcade menu: ←/→ (or ↑/↓) to choose, Enter to launch, mouse hover also selects
+      var wraps = Array.prototype.slice.call(document.querySelectorAll(".cart-wrap"));
+      var sel = 0;
+      function select(i, silent) {
+        sel = (i + wraps.length) % wraps.length;
+        wraps.forEach(function (w, k) { w.classList.toggle("is-selected", k === sel); });
+        if (!silent) L8.sound.select();
+      }
+      wraps.forEach(function (w, i) {
+        var card = w.querySelector(".cart");
+        FX.tilt(card);
+        w.addEventListener("mouseenter", function () { if (sel !== i) select(i); });
+        card.addEventListener("click", function (e) { e.preventDefault(); launch(card.href); });
+      });
+      function launch(href) {
+        L8.sound.go();
+        FX.flash("#ffffff");
+        setTimeout(function () { location.href = href; }, 220);
+      }
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") { select(sel + 1); e.preventDefault(); }
+        else if (e.key === "ArrowLeft" || e.key === "ArrowUp") { select(sel - 1); e.preventDefault(); }
+        else if (e.key === "Enter" || e.key === " ") { launch(wraps[sel].querySelector(".cart").href); e.preventDefault(); }
+        else if (e.key === "1" || e.key === "2") { launch(wraps[+e.key - 1].querySelector(".cart").href); }
+      });
+      select(0, true);
+    })();
   </script>
 </body>
 </html>

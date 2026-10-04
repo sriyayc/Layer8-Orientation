@@ -85,11 +85,14 @@ var L8 = (function () {
     } catch (e) { /* audio unavailable */ }
   }
   var sound = {
-    success: function () { tone([523, 659, 784, 1047], 0.22); },
-    error: function () { tone([220, 180], 0.22, "square"); },
-    timeup: function () { tone([392, 330, 262], 0.35, "triangle"); },
-    tick: function () { tone([880], 0.06); },
-    penalty: function () { tone([300], 0.18, "sawtooth"); },
+    success: function () { tone([523, 659, 784, 1047, 1319], 0.16, "square"); },
+    error: function () { tone([220, 165], 0.2, "square"); },
+    timeup: function () { tone([392, 330, 262, 196], 0.3, "square"); },
+    tick: function () { tone([880], 0.05, "square"); },
+    penalty: function () { tone([300, 200], 0.14, "sawtooth"); },
+    count: function () { tone([440], 0.12, "square"); },
+    go: function () { tone([880, 1175], 0.14, "square"); },
+    select: function () { tone([660], 0.05, "square"); },
     isMuted: function () { return muted; },
     toggle: function () { muted = !muted; store.set("l8.muted", muted); return muted; }
   };

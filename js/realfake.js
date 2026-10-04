@@ -85,7 +85,9 @@
     ui.options.innerHTML = "";
     state.buttons = [];
     options.forEach(function (opt, i) {
-      var btn = L8.el("button", { class: "rf-option frame", type: "button", "aria-label": "Option " + (i ? "B" : "A") });
+      var wrap = L8.el("div", { class: "opt-wrap glow" });
+      var btn = L8.el("button", { class: "rf-option panel", type: "button", "aria-label": "Option " + (i ? "B" : "A") });
+      wrap.appendChild(btn);
       var bar = L8.el("div", { class: "rf-option__bar" });
       var key = L8.el("span", { class: "rf-option__key" });
       key.innerHTML = "<b>" + (i + 1) + "</b>Option " + (i ? "B" : "A");
@@ -93,7 +95,7 @@
       btn.appendChild(bar);
       btn.appendChild(opt.node);
       btn.addEventListener("click", function () { choose(i); });
-      ui.options.appendChild(btn);
+      ui.options.appendChild(wrap);
       state.buttons.push(btn);
       if (opt.real) state.correctIdx = i;
     });
@@ -143,17 +145,24 @@
     var correct = state.buttons[state.correctIdx];
     if (i === state.correctIdx) {
       chosen.classList.add("is-correct");
+      chosen.parentNode.classList.add("win");
       tag(chosen, "REAL");
-      state.buttons[1 - i].classList.add("is-dim");
-      ui.result.textContent = "Correct — that's the real one";
+      state.buttons[1 - i].parentNode.classList.add("dim");
+      FX.flash("#3dff8f");
+      FX.burstAt(chosen, { count: 120, power: 10 });
+      ui.result.textContent = "CORRECT! THAT'S THE REAL ONE";
       ui.result.classList.add("rf-result--ok");
       L8.sound.success();
     } else {
       chosen.classList.add("is-wrong");
+      chosen.parentNode.classList.add("lose");
       tag(chosen, "FAKE");
+      FX.flash("#ff3d5a");
+      FX.shake(chosen.parentNode);
       correct.classList.add("is-reveal");
+      correct.parentNode.classList.add("win");
       tag(correct, "REAL");
-      ui.result.textContent = "Wrong — that one's a fake";
+      ui.result.textContent = "WRONG! THAT ONE'S A FAKE";
       ui.result.classList.add("rf-result--bad");
       L8.sound.error();
     }
@@ -166,18 +175,25 @@
     state.phase = "timeout";
     var correct = state.buttons[state.correctIdx];
     correct.classList.add("is-reveal");
+    correct.parentNode.classList.add("win");
     tag(correct, "REAL");
-    state.buttons[1 - state.correctIdx].classList.add("is-dim");
-    ui.result.textContent = "Time's up";
+    state.buttons[1 - state.correctIdx].parentNode.classList.add("dim");
+    FX.flash("#ff9a1f");
+    ui.result.textContent = "TIME'S UP!";
     ui.result.classList.add("rf-result--time");
     L8.sound.timeup();
     lock();
   }
 
   function begin() {
-    ui.start.classList.add("hidden");
-    ui.game.classList.remove("hidden");
-    newRound();
+    if (state.phase !== "idle" || state.counting) return;
+    state.counting = true;
+    FX.countdown(["READY?", "GO!"], function () {
+      state.counting = false;
+      ui.start.classList.add("hidden");
+      ui.game.classList.remove("hidden");
+      newRound();
+    });
   }
 
   ui.startBtn.addEventListener("click", begin);
@@ -198,6 +214,7 @@
 
   document.addEventListener("visibilitychange", function () { if (state.phase === "running") tick(); });
 
+  FX.init({ calm: true });
   L8.bindMuteButton($("muteBtn"));
   L8.startClock($("clock"));
 })();

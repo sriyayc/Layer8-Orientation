@@ -17,6 +17,16 @@ No install, no server, no internet. On each laptop:
 
 Each laptop runs its own copy, and its own vault and round order is saved in the browser. If the browser blocks storage, the game still works; it just doesn't remember the order.
 
+## Hub controls
+
+On the hub, use ←/→ (or the mouse) to pick a game and press Enter, or press 1 or 2 to jump straight to one.
+
+## Effects
+
+- Effects are switched off automatically if the laptop has "reduce motion" turned on in its accessibility settings.
+- Sounds are simple chiptune beeps made in the browser, so there are no audio files. The speaker icon mutes them.
+- The game screens skip the scanline overlay, so logos and clue text always show cleanly.
+
 ## Operating the games
 
 The team member drives the laptop and the participant answers out loud.
@@ -45,8 +55,11 @@ Each round is randomly a logo or a URL challenge. The real option's side is also
 index.html          hub page
 cracker.html        Password Cracker
 realfake.html       Real or Fake
-css/style.css       shared theme (dark "instrument" look)
-fonts/              bundled Geist, Geist Mono and Doto fonts (SIL OFL), so it works offline
+css/style.css       shared arcade theme
+js/fx.js            effects: animated starfield + neon grid, CRT power-on, READY/GO countdown,
+                    pixel confetti, screen flashes, shake, card tilt
+fonts/              bundled Press Start 2P, Doto, Geist and Geist Mono (SIL OFL), so it works offline
+img/brand/          Layer8 wordmark + "8" mark, PES University logo, favicon
 js/common.js        shared helpers (shuffled decks, storage, sounds)
 js/vaults.js        all 76 vaults, verbatim, plus the flagged list
 js/cracker.js       Password Cracker logic

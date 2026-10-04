@@ -62,6 +62,10 @@
     if (v.outro) body.appendChild(L8.el("p", { class: "outro", text: v.outro }));
     var chars = (v.intro || "").length + v.items.join("").length + (v.outro || "").length;
     body.classList.toggle("dense", v.items.length > 8 || chars > 420);
+    // lines type in one after another when the brief is revealed
+    Array.prototype.forEach.call(body.querySelectorAll("p, li"), function (n, i) {
+      n.style.animationDelay = (i * 70) + "ms";
+    });
   }
 
   function fmt(ms) {
@@ -84,6 +88,7 @@
     if (state.phase !== "running") level = state.phase === "timeout" ? "danger" : "ok";
     ui.dial.setAttribute("data-level", level);
     ui.dial.classList.toggle("running", state.phase === "running");
+    document.body.classList.toggle("alarm", state.phase === "running" && r <= 10000);
   }
 
   var STATUS_ICON = { ok: "unlock", bad: "cross", time: "clock", info: "info" };
@@ -148,7 +153,17 @@
   }
 
   function startVault() {
-    if (state.phase !== "ready") return;
+    if (state.phase !== "ready" || state.counting) return;
+    state.counting = true;
+    ui.start.disabled = true;
+    FX.countdown(["READY?", "GO!"], function () {
+      state.counting = false;
+      ui.start.disabled = false;
+      if (state.phase === "ready") beginClock();
+    });
+  }
+
+  function beginClock() {
     state.phase = "running";
     state.deadline = Date.now() + DURATION;
     state.remaining = DURATION;
@@ -178,6 +193,8 @@
     setStatus("time", "TIME'S UP!<small>VAULT REMAINS LOCKED.</small>");
     L8.sound.timeup();
     renderPhase();
+    FX.flash("#ff3d5a");
+    FX.shake(document.getElementById("stage"));
     ui.next.focus();
   }
 
@@ -187,6 +204,7 @@
     state.hints++;
     ui.hintCount.innerHTML = "Hints <b>" + state.hints + "</b>";
     L8.sound.penalty();
+    FX.flash("#ff2e97");
     var badge = L8.el("div", { class: "penalty", text: "−10s" });
     ui.dial.appendChild(badge);
     setTimeout(function () { badge.remove(); }, 1400);
@@ -214,9 +232,13 @@
       setStatus("ok", "VAULT CRACKED!");
       L8.sound.success();
       renderPhase();
+      FX.flash("#3dff8f");
+      FX.burstAt(ui.code, { count: 140, power: 11 });
+      setTimeout(function () { FX.burstAt(ui.dial, { count: 70, power: 8 }); }, 180);
       ui.next.focus();
     } else {
       shake();
+      FX.flash("#ff3d5a");
       L8.sound.error();
       setStatus("bad", "INCORRECT CODE — TRY AGAIN");
       clearInputs();
@@ -341,5 +363,6 @@
   // keep the timer honest if the tab was hidden
   document.addEventListener("visibilitychange", function () { if (state.phase === "running") tick(); });
 
+  FX.init({ calm: true });
   nextVault();
 })();

@@ -3,61 +3,66 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Real or Fake · Layer8</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='3' fill='%23d4ff3a'/%3E%3Ctext x='16' y='21' font-family='monospace' font-weight='700' font-size='13' text-anchor='middle' fill='%230b0d04'%3EL8%3C/text%3E%3C/svg%3E">
+  <title>Real or Fake · Layer8 Arcade</title>
+  <link rel="icon" href="img/brand/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="index.html" title="Back to games">
-      <span class="brand__mark">L8</span>
-      <span class="brand__crumbs">Layer8 / <span>Real or Fake</span></span>
-    </a>
-    <div class="topbar__spacer"></div>
-    <span class="readout readout--accent">Round <strong id="roundChip">--</strong></span>
-    <span class="readout"><span class="live-dot"></span><strong id="clock">--:--:--</strong></span>
-    <button class="icon-btn" id="muteBtn" type="button"></button>
-  </header>
+  <div class="screen">
+    <header class="topbar">
+      <a class="brand" href="index.html" title="Back to the arcade">
+        <img class="brand__mark" src="img/brand/layer8-mark.png" alt="Layer8">
+        <span class="brand__crumb">Game 02 · <span>Real or Fake</span></span>
+      </a>
+      <div class="topbar__spacer"></div>
+      <span class="readout">Round <strong id="roundChip">--</strong></span>
+      <button class="icon-btn" id="muteBtn" type="button"></button>
+      <img class="pesu" src="img/brand/pesu.png" alt="PES University">
+    </header>
 
-  <main class="rf">
-    <!-- start screen -->
-    <section class="rf-start" id="startScreen">
-      <div class="rf-start__box frame">
-        <span class="label">Module <b>02</b> · 10 seconds per round</span>
-        <h2>REAL <em>/</em> FAKE</h2>
-        <p>Each round shows <strong>two logos or two website links</strong>. One is real, one is a fake.
-           The player points at the real one before the timer runs out.</p>
-        <button class="btn btn--accent" id="startBtn" type="button">Start <kbd>↵</kbd></button>
-      </div>
-    </section>
-
-    <!-- game -->
-    <section class="hidden" id="game" style="display:contents">
-      <div class="rf-head">
-        <div>
-          <span class="label" id="kicker">Challenge · <b>logo</b></span>
-          <h2 id="question">Which one is real?</h2>
+    <main class="rf" id="stage">
+      <!-- start screen -->
+      <section class="rf-start" id="startScreen">
+        <div class="glow">
+          <div class="rf-start__box panel">
+            <span class="label">Game <b>02</b> · 10 seconds per round</span>
+            <h2><span class="neon-cyan">REAL</span> <span class="neon-yellow">/</span> <span class="neon-pink">FAKE</span></h2>
+            <p>Each round shows <strong>two logos or two website links</strong>. One is real, one is a fake.
+               The player points at the real one before the timer runs out.</p>
+            <button class="btn" id="startBtn" type="button">Press start <kbd>↵</kbd></button>
+          </div>
         </div>
-        <div class="rf-clock" id="rfClock" data-level="ok">
-          <span class="label">Sec</span>
-          <span class="rf-clock__num" id="timeNum">10</span>
+      </section>
+
+      <!-- game -->
+      <section class="hidden" id="game" style="display:contents">
+        <div class="rf-head">
+          <div>
+            <span class="label" id="kicker">Challenge · <b>logo</b></span>
+            <h2 id="question">Which one is real?</h2>
+          </div>
+          <div class="rf-clock" id="rfClock" data-level="ok">
+            <span class="label">Time</span>
+            <span class="rf-clock__num" id="timeNum">10</span>
+          </div>
         </div>
-      </div>
-      <div class="segments" id="segments" data-level="ok">
-        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
+        <div class="segments" id="segments" data-level="ok">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
 
-      <div class="rf-options" id="options"></div>
+        <div class="rf-options" id="options"></div>
 
-      <div class="rf-foot">
-        <span class="label">Operator: <kbd>1</kbd> <kbd>←</kbd> left · <kbd>2</kbd> <kbd>→</kbd> right · <kbd>↵</kbd> next</span>
-        <div class="rf-result" id="result"></div>
-        <button class="btn btn--accent hidden" id="nextBtn" type="button">Next round <kbd>↵</kbd></button>
-      </div>
-    </section>
-  </main>
+        <div class="rf-foot">
+          <span class="label"><kbd>1</kbd> left · <kbd>2</kbd> right · <kbd>↵</kbd> next</span>
+          <div class="rf-result" id="result"></div>
+          <button class="btn btn--cyan hidden" id="nextBtn" type="button">Next round <kbd>↵</kbd></button>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script src="js/common.js"></script>
+  <script src="js/fx.js"></script>
   <script src="js/logos.js"></script>
   <script src="js/urls.js"></script>
   <script src="js/realfake.js"></script>
