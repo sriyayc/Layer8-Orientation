@@ -697,3 +697,16 @@ kbd { font-family: var(--pixel); font-size: 9px; border: 2px solid var(--line); 
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .clues li, .clues p { opacity: 1; }
 }
+
+/* LED colon: the Doto font's ":" looks like "+", so draw two square dots instead */
+.colon {
+  display: inline-block;
+  width: .13em;
+  height: .52em;
+  margin: 0 .1em;
+  vertical-align: .08em;
+  background:
+    linear-gradient(currentColor, currentColor) top / 100% .13em no-repeat,
+    linear-gradient(currentColor, currentColor) bottom / 100% .13em no-repeat;
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

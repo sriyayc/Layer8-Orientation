@@ -77,7 +77,8 @@
 
   function renderTimer() {
     var r = Math.max(0, state.remaining);
-    ui.timerText.textContent = fmt(r);
+    // the LED font draws ":" like a "+", so the colon is drawn as two dots
+    ui.timerText.innerHTML = fmt(r).replace(":", "<span class=\"colon\" aria-hidden=\"true\"></span><span class=\"sr\">:</span>");
     // remaining seconds light up clockwise from 12 o'clock
     var lit = Math.ceil(r / 1000);
     if (lit !== state.lit) {
