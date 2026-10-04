@@ -48,7 +48,18 @@
     "https://help.dropbox.com/account-settings"
   ];
 
+  function host(url) { return url.replace(/^https?:\/\//, "").split("/")[0]; }
+  function domain(h) { return h.split(".").slice(-2).join("."); }
+
   window.URLS = RIGHT.map(function (real, i) {
-    return { id: i + 1, real: real, fake: WRONG[i] };
+    var rh = host(real), fh = host(WRONG[i]);
+    return {
+      id: i + 1,
+      real: real,
+      fake: WRONG[i],
+      // the "tell", shown after each round and printed in the answer key
+      hint: "The real link is on " + domain(rh) + ". The fake is on " + fh +
+        ", a different website that only has the brand name in it."
+    };
   });
 })();

@@ -64,6 +64,7 @@
 
     if (isLogo) {
       var logo = logoBy[logoDeck.next()];
+      state.tell = logo.hint;
       ui.kicker.innerHTML = "Challenge · <b>logo</b>";
       ui.question.innerHTML = "";
       ui.question.append("Which ", L8.el("span", { class: "brand-name", text: logo.name }), " logo is real?");
@@ -73,6 +74,7 @@
       ];
     } else {
       var pair = urlBy[urlDeck.next()];
+      state.tell = pair.hint;
       ui.kicker.innerHTML = "Challenge · <b>link</b>";
       ui.question.textContent = "Which website link is real?";
       options = [
@@ -131,7 +133,13 @@
     btn.querySelector(".rf-option__bar").appendChild(L8.el("span", { class: "rf-option__tag", text: text }));
   }
 
+  function showTell() {
+    if (!state.tell) return;
+    ui.result.appendChild(L8.el("small", { class: "rf-why", text: state.tell }));
+  }
+
   function lock() {
+    showTell();
     state.buttons.forEach(function (b) { b.disabled = true; });
     ui.next.classList.remove("hidden");
     ui.next.focus();

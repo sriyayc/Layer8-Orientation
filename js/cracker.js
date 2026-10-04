@@ -23,7 +23,7 @@
     status: $("status"),
     start: $("startBtn"), crack: $("crackBtn"), hint: $("hintBtn"), next: $("nextBtn"),
     drawer: $("drawer"), backdrop: $("drawerBackdrop"), grid: $("vaultGrid"),
-    answerOut: $("answerOut"), peek: $("peekBtn")
+    answerOut: $("answerOut"), peek: $("peekBtn"), hintText: $("hintText")
   };
 
   var state = { vault: null, phase: "ready", deadline: 0, remaining: DURATION, interval: null, lastTick: null, hints: 0, lit: -1 };
@@ -145,6 +145,7 @@
     ui.chip.textContent = state.vault.id.toUpperCase();
     ui.num.textContent = state.vault.id === "37b" ? "37B" : state.vault.id;
     L8.scramble(ui.title, state.vault.title, 450);
+    ui.hintText.textContent = state.vault.hint || "No hint written for this vault.";
     renderClues(state.vault);
     clearInputs();
     setStatus("", "");

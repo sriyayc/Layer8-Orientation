@@ -39,6 +39,7 @@ The team member drives the laptop and the participant answers out loud.
 | Submit | **Crack Vault**, or press Enter in a box. |
 | Hint | Give the hint verbally, then click **Hint**. This takes 10 seconds off the timer. |
 | Next vault | Shown after a crack or when time runs out. It picks a random vault this laptop hasn't shown yet. |
+| Hints | Each vault has a written hint in the operator panel. Read it out, then click **Hint**. |
 | Operator panel | Gear icon, top right. **Hold to reveal** shows the answer only while the button is held. You can also restart the vault, jump to a specific vault, or reshuffle the rotation. |
 
 ### Real or Fake
@@ -69,28 +70,36 @@ js/realfake.js      Real or Fake logic
 img/logos/          120 logo images (<slug>_real.png / <slug>_fake.png)
 ```
 
-## Vault content and the flagged list
+## Vault content and corrections
 
-`js/vaults.js` holds every vault from the PDF (Vault Lock 01–75 plus 37 Part 2) **verbatim**. The vaults below have a printed answer that doesn't match their own clues, so they're marked `flagged` and **excluded from play**. 62 vaults are playable.
+`js/vaults.js` holds all 76 vaults (Vault Lock 01–75 plus 37 Part 2), and **all 76 are playable**. Each vault also has an operator hint.
 
-| Vault | PDF answer | Problem |
+The vaults below were corrected because the original sheet's answer didn't match its clues, or more than one code fitted. Every vault's clues were brute-force checked against all 10,000 codes: each one now has exactly one valid code, and it's the listed answer. Each change is logged in the `CORRECTED` object at the top of `js/vaults.js`.
+
+| Vault | Answer | What changed |
 |---|---|---|
-| 10 | 8056 | 4th-digit sequence (25, 7, 20, 2, 15, ?) continues to -3, not 6 |
-| 14 | 4875 | 4875: 4 × 8 = 32, not 24 — no code satisfies all clues |
-| 24 | 8514 | 4952 also satisfies every clue |
-| 25 | 3467 | 7 other codes also satisfy every clue |
-| 38 | 5843 | 5843: third digit (4) is not greater than the second (8) |
-| 39 | 2971 | 2971 vs 4927 gives 1 correct-place + 2 wrong-place, not 1 |
-| 40 | 1000 | steps compute to 880, PDF answer is 1000 |
-| 42 | 8640 | 8640: last digit 0 is not prime — no code satisfies all clues |
-| 43 | 510 | steps compute to 285, PDF answer is 510 (also only 3 digits) |
-| 44 | 5867 | 5697 and 5796 also satisfy every clue |
-| 48 | 4725 | 44 other codes also satisfy every clue |
-| 52 | 1680 | steps compute to 360, PDF answer is 1680 |
-| 54 | 270 | steps compute to 220, PDF answer is 270 (also only 3 digits) |
-| 56 | 7353 | 7353 repeats the digit 3 despite 'No repetition' |
+| 04 | 5621 | Added the rule to use only the last digit of two-digit results (the answer already relied on it). |
+| 10 | 8056 | 4th-digit sequence changed from 25, 7, 20, 2, 15 to 25, 16, 20, 11, 15 so it really continues to 6. |
+| 14 | 4875 | 'First two digits multiply to 24' changed to 32; added 'third digit greater than fourth' so the code is unique. |
+| 24 | 8514 | Added 'first digit greater than 5' (4952 also fitted). |
+| 25 | 3467 | Added 'digits increase left to right' and 'first digit is prime' (7 other codes also fitted). |
+| 38 | 5843 | 'Third digit greater than second' changed to 'less than'; added four clues so 5843 is the only code. |
+| 39 | 2971 | Feedback for 4927 and 2751 rewritten to match 2971; added 'first digit is even' so the code is unique. |
+| 40 | 1000 | Last step changed from Add 100 to Add 220 so the steps give 1000. |
+| 42 | 8640 | 'First = sum of last two' changed to 'first = 2 × third'; 'last digit is prime' changed to 'last digit is even' (0 is not prime). |
+| 43 | 1350 | Last step changed from Add 60 to Multiply by 6; answer is now 1350 (old answer 510 was wrong and only 3 digits). |
+| 44 | 5867 | Added a fifth guess (9687) so 5867 is the only code (5697 and 5796 also fitted). |
+| 48 | 4725 | Added four clues so 4725 is the only code (44 other codes also fitted). |
+| 52 | 1680 | Second step changed from Add 400 to Add 2600 so the steps give 1680. |
+| 54 | 1340 | Fourth step changed from Multiply by 5 to Multiply by 25; answer is now 1340 (old answer 270 was wrong and only 3 digits). |
+| 56 | 8352 | Answer changed from 7353 (repeats the 3) to 8352; added two clues so it is the only code. |
+| 60 | 7305 | Added what Hot / Warm mean. |
+| 61 | 2914 | Added what Hot / Warm / Cold mean. |
+| 72 | 5493 | Intro said 'the sum of each pair', but the lines also subtract and divide; reworded. |
 
-**To fix one:** edit its clues or answer in `js/vaults.js`, then delete its entry from the `FLAGGED` object at the top of that file. A vault is playable only when it's not flagged and its answer is exactly 4 digits.
+**If you find a new problem:** add the vault's id to the `FLAGGED` object in `js/vaults.js` and the game will skip it until it's fixed.
+
+The full corrected question sheet, with answers and hints, is in `docs/Password-Cracker-Answer-Key.pdf`. The logo and URL answer key is in `docs/Real-or-Fake-Answer-Key.pdf`.
 
 ## Logo images
 

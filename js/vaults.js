@@ -16,24 +16,32 @@
    To re-enable a vault after correcting it, set `flagged: false` (or delete its entry in FLAGGED). */
 
 (function () {
-  // Vaults whose printed answer does not match its clues (found during Step 0 verification).
-  // They stay in the bank verbatim but are skipped by the game.
-  var FLAGGED = {
-    "10": "4th-digit sequence (25, 7, 20, 2, 15, ?) continues to -3, not 6",
-    "14": "4875: 4 × 8 = 32, not 24 — no code satisfies all clues",
-    "24": "4952 also satisfies every clue",
-    "25": "7 other codes also satisfy every clue",
-    "38": "5843: third digit (4) is not greater than the second (8)",
-    "39": "2971 vs 4927 gives 1 correct-place + 2 wrong-place, not 1",
-    "40": "steps compute to 880, PDF answer is 1000",
-    "42": "8640: last digit 0 is not prime — no code satisfies all clues",
-    "43": "steps compute to 285, PDF answer is 510 (also only 3 digits)",
-    "44": "5697 and 5796 also satisfy every clue",
-    "48": "44 other codes also satisfy every clue",
-    "52": "steps compute to 360, PDF answer is 1680",
-    "54": "steps compute to 220, PDF answer is 270 (also only 3 digits)",
-    "56": "7353 repeats the digit 3 despite 'No repetition'"
+  // Vaults corrected after Step 0 verification (the original PDF content did not match its answer,
+  // or allowed more than one valid code). Every vault has been brute-force checked: its clues now
+  // have exactly one solution, and it is the listed answer.
+  var CORRECTED = {
+    "04": "Added the rule to use only the last digit of two-digit results (the answer already relied on it).",
+    "10": "4th-digit sequence changed from 25, 7, 20, 2, 15 to 25, 16, 20, 11, 15 so it really continues to 6.",
+    "14": "'First two digits multiply to 24' changed to 32; added 'third digit greater than fourth' so the code is unique.",
+    "24": "Added 'first digit greater than 5' (4952 also fitted).",
+    "25": "Added 'digits increase left to right' and 'first digit is prime' (7 other codes also fitted).",
+    "38": "'Third digit greater than second' changed to 'less than'; added four clues so 5843 is the only code.",
+    "39": "Feedback for 4927 and 2751 rewritten to match 2971; added 'first digit is even' so the code is unique.",
+    "40": "Last step changed from Add 100 to Add 220 so the steps give 1000.",
+    "42": "'First = sum of last two' changed to 'first = 2 × third'; 'last digit is prime' changed to 'last digit is even' (0 is not prime).",
+    "43": "Last step changed from Add 60 to Multiply by 6; answer is now 1350 (old answer 510 was wrong and only 3 digits).",
+    "44": "Added a fifth guess (9687) so 5867 is the only code (5697 and 5796 also fitted).",
+    "48": "Added four clues so 4725 is the only code (44 other codes also fitted).",
+    "52": "Second step changed from Add 400 to Add 2600 so the steps give 1680.",
+    "54": "Fourth step changed from Multiply by 5 to Multiply by 25; answer is now 1340 (old answer 270 was wrong and only 3 digits).",
+    "56": "Answer changed from 7353 (repeats the 3) to 8352; added two clues so it is the only code.",
+    "60": "Added what Hot / Warm mean.",
+    "61": "Added what Hot / Warm / Cold mean.",
+    "72": "Intro said 'the sum of each pair', but the lines also subtract and divide; reworded."
   };
+
+  // Any vault listed here is skipped by the game (use it for future problems found in the sheet).
+  var FLAGGED = {};
 
   function B(id, items, answer, extra) {
     return make(id, null, items, false, answer, extra);
@@ -55,11 +63,93 @@
       answer: answer,
       answerText: answer,
       flagged: Object.prototype.hasOwnProperty.call(FLAGGED, id),
-      flagReason: FLAGGED[id] || null
+      flagReason: FLAGGED[id] || null,
+      corrected: CORRECTED[id] || null,
+      hint: HINTS[id] || null
     };
     if (extra) for (var k in extra) v[k] = extra[k];
     return v;
   }
+
+  // Operator hints: a nudge to say out loud, not the answer.
+  var HINTS = {
+    "01": "The second digit is given. The first digit is 5 more than it.",
+    "02": "The first digit is given. Use it to get the second, then the third.",
+    "03": "After the first three steps you should have 36.",
+    "04": "1st: add 3 each time. 2nd: add 3, 5, 7, 9. 3rd: take away 3, 4, 5, 6. 4th: add 1, 2, 3, 4.",
+    "05": "1732 and 5726 rule out 1, 7, 3, 2, 5 and 6. See what is left in 1867 and 3109.",
+    "06": "8402 rules out 8, 4, 0 and 2, so in 2980 the 9 must be the correct digit (second place).",
+    "07": "After four steps you should have 240.",
+    "08": "After four steps you should have 400.",
+    "09": "The first digit is 4 more than 2. Everything else follows from the first two digits.",
+    "10": "1st: multiply the previous two. 2nd: the gaps grow by 2. 3rd: add the previous two. 4th: two sequences take turns, each going down by 5.",
+    "11": "1732 and 5726 rule out 1, 7, 3, 2, 5 and 6. In 8125 only the 8 can be right.",
+    "12": "1289 and 8394 rule out 1, 2, 8, 9, 3 and 4. In 4972 only the 7 can be right.",
+    "13": "After five steps you should have 189.",
+    "14": "Which two digits multiply to 35? Which two multiply to 32 with the smaller one first?",
+    "15": "Before the hexagon step you should have 120.",
+    "16": "LAYER8 has two vowels: A and E.",
+    "17": "Use 'first + last = 10' and 'second + last = 7' together with 'second = third + 2'.",
+    "18": "After two steps you should have 1028.",
+    "19": "The smallest prime number is 2, not 1.",
+    "20": "Just count the letters: O-N-E is 3.",
+    "21": "MISSISSIPPI: count the letters that repeat (I, S, P), not how often. A STOP sign is an octagon.",
+    "22": "After four steps you should have 163.",
+    "23": "The first two digits add to 10 and can't use 1, 5 or 8. Try 7 + 3 or 6 + 4.",
+    "24": "The first digit is twice the last and greater than 5, so it must be 8.",
+    "25": "Which two digits multiply to 24? The digits go up from left to right.",
+    "26": "After three steps you should have 300.",
+    "27": "After the 'Divide by 6' step you should have 180.",
+    "28": "Look at the number keys directly above Q, W, E and R.",
+    "29": "HACK has 4 letters. 2FA means two factors.",
+    "30": "After four steps you should have 2040.",
+    "31": "After four steps you should have 1708.",
+    "32": "After four steps you should have 1200.",
+    "33": "After four steps you should have 1200.",
+    "34": "4821 reversed is 1284.",
+    "35": "1638 reversed is 8361.",
+    "36": "Both sums come out to 10, so the difference is 0.",
+    "37": "After three steps you should have 2000.",
+    "37b": "Start from the second digit: it is 3.",
+    "38": "The digits add to 20 and the second is the largest. Try 8 for the second digit.",
+    "39": "6408 rules out 6, 4, 0 and 8. 2751 shares three digits with the code.",
+    "40": "After three steps you should have 50.",
+    "41": "The factors of 10 are 1, 2, 5 and 10.",
+    "42": "The first digit is twice the third, and the third is even. Try 4 for the third digit.",
+    "43": "After three steps you should have 120.",
+    "44": "1234 rules out 1, 2, 3 and 4, so in 7012 only the 7 or the 0 can be right.",
+    "45": "A spider has 8 legs.",
+    "46": "The second digit is 5, so the first is 8.",
+    "47": "After three steps you should have 36.",
+    "48": "The third digit is half the first. The last is odd and bigger than the first.",
+    "49": "A nibble is half a byte: 4 bits. The OSI model has 7 layers.",
+    "50": "After three steps you should have 80.",
+    "51": "5837 and 6429 tell you which digits are definitely out. Then use 1578 to place the rest.",
+    "52": "After two steps you should have 3000.",
+    "53": "PASSWORD has two vowels: A and O. An OTP is usually 6 digits.",
+    "54": "After three steps you should have 56.",
+    "55": "Work backwards: the third digit is half the second, and the second is half the first.",
+    "56": "First + last = 10 and the last is prime. Try 2 or 3 for the last digit.",
+    "57": "FIREWALL has three vowels: I, E and A. The primes from 1 to 3 are 2 and 3.",
+    "58": "SSH uses port 22. Decimal 3 is 0011 in binary.",
+    "59": "AND needs both inputs to be 1. NOT flips the input.",
+    "60": "5370 is 1 hot + 3 warm, so the code uses exactly the digits 5, 3, 7 and 0.",
+    "61": "4192 is 4 warm, so the code uses exactly the digits 4, 1, 9 and 2.",
+    "62": "Gym days: Monday, Wednesday, Friday, Sunday.",
+    "63": "S is on key 7 and A is on key 2.",
+    "64": "After three steps you should have 45.",
+    "65": "After four steps you should have 300.",
+    "66": "W is the 2nd key on the top row and I is the 8th.",
+    "67": "These are Roman numerals: V is 5.",
+    "68": "Take each top face away from 7.",
+    "69": "Helium is element 2 and Hydrogen is element 1.",
+    "70": "At 25 minutes past, the minute hand points at the 5.",
+    "71": "Convert each group from binary: 0111 is 7.",
+    "72": "There are 2 weekend days. A unicycle has 1 wheel.",
+    "73": "The first digit is greater than 5 and twice the last, so it is 6 or 8.",
+    "74": "After four steps you should have 42.",
+    "75": "The second digit is 7 − 5 = 2."
+  };
 
   var NO_REPEAT = "Find the 4-digit vault code. No digit is repeated.";
   var SEQ = "Find the missing number in each sequence. The four missing numbers form the vault code.";
@@ -86,7 +176,7 @@
       "Divide by 2", "Add 16", "Multiply by 12", "Subtract 100"
     ], "1100"),
 
-    T("04", SEQ, [
+    T("04", SEQ + " If a missing number has two digits, use only its last digit.", [
       "1st digit: 3, 6, 9, 12, ?",
       "2nd digit: 2, 5, 10, 17, ?",
       "3rd digit: 20, 17, 13, 8, ?",
@@ -130,7 +220,7 @@
       "1st digit: 1, 2, 2, 4, ?",
       "2nd digit: 20, 18, 14, 8, ?",
       "3rd digit: 0, 1, 1, 2, 3, ?",
-      "4th digit: 25, 7, 20, 2, 15, ?"
+      "4th digit: 25, 16, 20, 11, 15, ?"
     ], "8056"),
 
     T("11", NO_REPEAT, [
@@ -154,10 +244,11 @@
 
     B("14", [
       "Find the 4-digit password.",
-      "The first two digits multiply to 24.",
+      "The first two digits multiply to 32.",
       "The last two digits multiply to 35.",
       "All four digits add up to 24.",
-      "The first digit is smaller than the second digit."
+      "The first digit is smaller than the second digit.",
+      "The third digit is greater than the fourth digit."
     ], "4875"),
 
     S("15", "Start with 100, then:", [
@@ -233,7 +324,8 @@
       "The first two digits add up to 13.",
       "The last digit is even.",
       "The first digit is twice the last digit.",
-      "The second digit is 4 more than the third digit."
+      "The second digit is 4 more than the third digit.",
+      "The first digit is greater than 5."
     ], "8514"),
 
     B("25", [
@@ -241,7 +333,9 @@
       "Exactly two digits are even.",
       "No digit is repeated.",
       "The first and last digits add up to 10.",
-      "The middle two digits multiply to 24."
+      "The middle two digits multiply to 24.",
+      "The digits increase from left to right.",
+      "The first digit is a prime number."
     ], "3467"),
 
     S("26", "Start with 72, then:", [
@@ -318,21 +412,26 @@
       "The code is not 9999.",
       "The first digit is odd.",
       "The second digit is even.",
-      "The third digit is greater than the second.",
+      "The third digit is less than the second.",
       "The last digit is less than the first.",
-      "The sum of all digits is 20."
+      "The sum of all digits is 20.",
+      "No digit is repeated.",
+      "The second digit is the largest digit.",
+      "The third digit is 1 more than the last digit.",
+      "The last digit is odd."
     ], "5843"),
 
     B("39", [
-      "4927: one digit correct and in the right place.",
+      "4927: one digit correct and in the right place, and two digits correct but in the wrong place.",
       "8136: one digit correct but in the wrong place.",
-      "2751: two digits correct, but one in the wrong place.",
-      "6408: nothing is correct."
+      "2751: three digits correct, two of them in the right place.",
+      "6408: nothing is correct.",
+      "The first digit is even."
     ], "2971"),
 
     S("40", "Start with 40, then:", [
       "Multiply by 5", "Add 300", "Divide by 10", "Multiply by 9", "Subtract 60",
-      "Multiply by 2", "Add 100"
+      "Multiply by 2", "Add 220"
     ], "1000"),
 
     B("41", [
@@ -345,23 +444,24 @@
     B("42", [
       "No digit repeats.",
       "The code contains no 1, 5, or 9.",
-      "First digit = sum of last two digits.",
+      "First digit = 2 × third digit.",
       "Second digit = first digit − 2.",
       "Third digit is even.",
-      "Last digit is prime.",
+      "Last digit is even.",
       "Sum of all digits = 18."
     ], "8640"),
 
     S("43", "Start with 30, then:", [
       "Multiply by 6", "Add 180", "Divide by 3", "Multiply by 5", "Subtract 150",
-      "Divide by 2", "Add 60"
-    ], "510"),
+      "Divide by 2", "Multiply by 6"
+    ], "1350"),
 
     B("44", [
       "❌ 1234: nothing is correct.",
       "🔥 5073: two digits correct, one in the right place.",
       "🌡️ 5890: two digits correct and in the right place.",
       "❌ 7012: one digit correct but in the wrong place.",
+      "🔥 9687: three digits correct, one in the right place.",
       "No repetition."
     ], "5867"),
 
@@ -392,7 +492,11 @@
       "Second is odd.",
       "Third is less than the second.",
       "Last is greater than the first.",
-      "Sum = 18."
+      "Sum = 18.",
+      "No digit is repeated.",
+      "Second is the largest digit.",
+      "Third is half the first.",
+      "Last is odd."
     ], "4725"),
 
     B("49", [
@@ -416,7 +520,7 @@
     ], "5821"),
 
     S("52", "Start with 80, then:", [
-      "Multiply by 5", "Add 400", "Divide by 10", "Multiply by 6", "Subtract 120"
+      "Multiply by 5", "Add 2600", "Divide by 10", "Multiply by 6", "Subtract 120"
     ], "1680"),
 
     B("53", [
@@ -427,8 +531,8 @@
     ], "5264", { answerText: "5, 2, 6, 4 → 5264" }),
 
     S("54", "Start with 36, then:", [
-      "Multiply by 7", "Add 84", "Divide by 6", "Multiply by 5", "Subtract 60"
-    ], "270"),
+      "Multiply by 7", "Add 84", "Divide by 6", "Multiply by 25", "Subtract 60"
+    ], "1340"),
 
     B("55", [
       "All digits different.",
@@ -445,8 +549,10 @@
       "Third digit is odd.",
       "Last digit is prime.",
       "First + last = 10.",
-      "Second + third = 8."
-    ], "7353"),
+      "Second + third = 8.",
+      "Second < third.",
+      "Second digit is prime."
+    ], "8352"),
 
     B("57", [
       "Digit 1: number of letters in \"PATCH\".",
@@ -469,7 +575,7 @@
       "Digit 4: output of a NOT gate when Input A = 0."
     ], "1001"),
 
-    B("60", [
+    T("60", "Hot = right digit in the right place. Warm = right digit in the wrong place.", [
       "1357 → 1 Hot, 2 Warm",
       "7218 → 1 Hot, 0 Warm",
       "4960 → 0 Hot, 1 Warm",
@@ -477,7 +583,7 @@
       "5370 → 1 Hot, 3 Warm"
     ], "7305"),
 
-    B("61", [
+    T("61", "Hot = right digit in the right place. Warm = right digit in the wrong place. Cold = digit not in the code.", [
       "9124 → 1 Hot, 3 Warm",
       "5830 → Everything is Cold",
       "2678 → 1 Hot, 0 Warm",
@@ -525,7 +631,7 @@
 
     T("71", "Each group of 4 bits is one digit of the code: 0111 | 0011 | 1000 | 0100", [], "7384"),
 
-    T("72", "The code is the sum of each pair, in order:", [
+    T("72", "Work out each line. The four results, in order, form the code:", [
       "Digit 1: the number of days in a week minus the number of weekend days.",
       "Digit 2: the number of legs on a spider divided by the number of legs on a human.",
       "Digit 3: the number of sides on a hexagon plus the number of sides on a triangle.",
