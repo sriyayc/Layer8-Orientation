@@ -4,7 +4,6 @@
 (function () {
   var DURATION = 120 * 1000;   // 2 minutes per vault
   var HINT_PENALTY = 10 * 1000; // 10 seconds per hint
-  var RING_LEN = 2 * Math.PI * 52;
 
   var playable = window.VAULTS.filter(function (v) {
     return !v.flagged && /^\d{4}$/.test(v.answer);
@@ -18,7 +17,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var ui = {
     chip: $("vaultChip"), title: $("vaultTitle"), veil: $("veil"), body: $("clueBody"),
-    timer: $("timer"), ring: $("timerRing"), timerText: $("timerText"),
+    dial: $("dial"), ticks: $("dialTicks"), timerText: $("timerText"),
+    num: $("vaultNum"), briefState: $("briefState"), hintCount: $("hintCount"),
     code: $("code"), inputs: Array.prototype.slice.call($("code").querySelectorAll("input")),
     status: $("status"),
     start: $("startBtn"), crack: $("crackBtn"), hint: $("hintBtn"), next: $("nextBtn"),
@@ -26,9 +26,27 @@
     answerOut: $("answerOut"), peek: $("peekBtn")
   };
 
-  var state = { vault: null, phase: "ready", deadline: 0, remaining: DURATION, interval: null, lastTick: null };
+  var state = { vault: null, phase: "ready", deadline: 0, remaining: DURATION, interval: null, lastTick: null, hints: 0, lit: -1 };
 
-  ui.ring.style.strokeDasharray = RING_LEN;
+  // 120 tick marks, one per second, drawn once.
+  var TICKS = DURATION / 1000;
+  var tickEls = [];
+  (function buildDial() {
+    var ns = "http://www.w3.org/2000/svg";
+    for (var i = 0; i < TICKS; i++) {
+      var a = (i / TICKS) * Math.PI * 2 - Math.PI / 2;
+      var major = i % 10 === 0;
+      var r1 = major ? 80 : 84, r2 = 96;
+      var line = document.createElementNS(ns, "line");
+      line.setAttribute("x1", 100 + r1 * Math.cos(a));
+      line.setAttribute("y1", 100 + r1 * Math.sin(a));
+      line.setAttribute("x2", 100 + r2 * Math.cos(a));
+      line.setAttribute("y2", 100 + r2 * Math.sin(a));
+      if (major) line.setAttribute("class", "major");
+      ui.ticks.appendChild(line);
+      tickEls.push(line);
+    }
+  })();
 
   /* ---------- rendering ---------- */
 
@@ -42,7 +60,7 @@
       body.appendChild(list);
     }
     if (v.outro) body.appendChild(L8.el("p", { class: "outro", text: v.outro }));
-    var chars = (v.intro || "").length + v.items.join("").length;
+    var chars = (v.intro || "").length + v.items.join("").length + (v.outro || "").length;
     body.classList.toggle("dense", v.items.length > 8 || chars > 420);
   }
 
@@ -56,15 +74,22 @@
   function renderTimer() {
     var r = Math.max(0, state.remaining);
     ui.timerText.textContent = fmt(r);
-    ui.ring.style.strokeDashoffset = RING_LEN * (1 - r / DURATION);
+    // remaining seconds light up clockwise from 12 o'clock
+    var lit = Math.ceil(r / 1000);
+    if (lit !== state.lit) {
+      state.lit = lit;
+      for (var i = 0; i < TICKS; i++) tickEls[i].classList.toggle("on", i < lit);
+    }
     var level = r <= 10000 ? "danger" : r <= 30000 ? "warn" : "ok";
     if (state.phase !== "running") level = state.phase === "timeout" ? "danger" : "ok";
-    ui.timer.setAttribute("data-level", level);
+    ui.dial.setAttribute("data-level", level);
+    ui.dial.classList.toggle("running", state.phase === "running");
   }
 
+  var STATUS_ICON = { ok: "unlock", bad: "cross", time: "clock", info: "info" };
   function setStatus(kind, html) {
     ui.status.className = "status" + (kind ? " status--" + kind : "");
-    ui.status.innerHTML = html || "";
+    ui.status.innerHTML = html ? L8.ICONS[STATUS_ICON[kind]] + "<div>" + html + "</div>" : "";
   }
 
   function show(btn, on) { btn.classList.toggle("hidden", !on); }
@@ -75,7 +100,9 @@
     show(ui.crack, p === "running");
     show(ui.hint, p === "running");
     show(ui.next, p === "cracked" || p === "timeout");
-    ui.veil.classList.toggle("hidden", p === "ready" ? false : true);
+    ui.veil.classList.toggle("hidden", p !== "ready");
+    ui.briefState.innerHTML = p === "ready" ? "Brief · <b>sealed</b>" : p === "running" ? "Brief · <b>live</b>" : p === "cracked" ? "Vault · <b>open</b>" : "Vault · <b>locked</b>";
+    ui.hintCount.innerHTML = "Hints <b>" + state.hints + "</b>";
     ui.body.classList.toggle("hidden", p === "ready");
     ui.inputs.forEach(function (i) { i.disabled = p !== "running"; });
     ui.code.classList.toggle("ok", p === "cracked");
@@ -109,8 +136,10 @@
     state.phase = "ready";
     state.remaining = DURATION;
     state.lastTick = null;
-    ui.chip.textContent = state.vault.title.replace("Vault Lock ", "Vault ");
-    ui.title.textContent = state.vault.title;
+    state.hints = 0;
+    ui.chip.textContent = state.vault.id.toUpperCase();
+    ui.num.textContent = state.vault.id === "37b" ? "37B" : state.vault.id;
+    L8.scramble(ui.title, state.vault.title, 450);
     renderClues(state.vault);
     clearInputs();
     setStatus("", "");
@@ -146,7 +175,7 @@
     state.remaining = 0;
     state.phase = "timeout";
     done[state.vault.id] = true;
-    setStatus("time", "⏰ TIME'S UP!<small>VAULT REMAINS LOCKED.</small>");
+    setStatus("time", "TIME'S UP!<small>VAULT REMAINS LOCKED.</small>");
     L8.sound.timeup();
     renderPhase();
     ui.next.focus();
@@ -155,9 +184,11 @@
   function hint() {
     if (state.phase !== "running") return;
     state.deadline -= HINT_PENALTY;
+    state.hints++;
+    ui.hintCount.innerHTML = "Hints <b>" + state.hints + "</b>";
     L8.sound.penalty();
     var badge = L8.el("div", { class: "penalty", text: "−10s" });
-    ui.timer.appendChild(badge);
+    ui.dial.appendChild(badge);
     setTimeout(function () { badge.remove(); }, 1400);
     tick();
     if (state.phase === "running") ui.inputs[firstEmpty()].focus();
@@ -180,14 +211,14 @@
       stopClock();
       state.phase = "cracked";
       done[state.vault.id] = true;
-      setStatus("ok", "🔓 VAULT CRACKED!");
+      setStatus("ok", "VAULT CRACKED!");
       L8.sound.success();
       renderPhase();
       ui.next.focus();
     } else {
       shake();
       L8.sound.error();
-      setStatus("bad", "❌ INCORRECT CODE — TRY AGAIN");
+      setStatus("bad", "INCORRECT CODE — TRY AGAIN");
       clearInputs();
       ui.inputs[0].focus();
     }
@@ -284,7 +315,7 @@
     hideAnswer();
   }
   function showAnswer() { if (state.vault) ui.answerOut.textContent = state.vault.answer; }
-  function hideAnswer() { ui.answerOut.textContent = "••••"; }
+  function hideAnswer() { ui.answerOut.textContent = "····"; }
 
   $("operatorBtn").addEventListener("click", openDrawer);
   $("drawerClose").addEventListener("click", closeDrawer);
@@ -305,6 +336,7 @@
   });
 
   L8.bindMuteButton($("muteBtn"));
+  L8.startClock($("clock"));
 
   // keep the timer honest if the tab was hidden
   document.addEventListener("visibilitychange", function () { if (state.phase === "running") tick(); });

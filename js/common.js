@@ -113,12 +113,59 @@ var L8 = (function () {
       btn.setAttribute("aria-label", sound.isMuted() ? "Unmute sounds" : "Mute sounds");
       btn.title = btn.getAttribute("aria-label");
       btn.innerHTML = sound.isMuted()
-        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6M17 9l6 6"/></svg>'
-        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="m23 9-6 6M17 9l6 6"/></svg>'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>';
     };
     btn.addEventListener("click", function () { sound.toggle(); render(); });
     render();
   }
 
-  return { shuffle: shuffle, store: store, Deck: Deck, sound: sound, el: el, bindMuteButton: bindMuteButton };
+  // Live HH:MM:SS readout in the top bar.
+  function startClock(node) {
+    if (!node) return;
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    var render = function () {
+      var d = new Date();
+      node.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+    };
+    render();
+    setInterval(render, 1000);
+  }
+
+  // Short "decode" effect: random glyphs settle into the final text, left to right.
+  var GLYPHS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&*+=/<>";
+  function scramble(node, text, duration) {
+    if (!node) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      node.textContent = text;
+      return;
+    }
+    duration = duration || 520;
+    var start = performance.now();
+    if (node._scramble) cancelAnimationFrame(node._scramble);
+    var frame = function (now) {
+      var p = Math.min(1, (now - start) / duration);
+      var settled = Math.floor(p * text.length);
+      var out = text.slice(0, settled);
+      for (var i = settled; i < text.length; i++) {
+        out += text[i] === " " ? " " : GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+      }
+      node.textContent = out;
+      if (p < 1) node._scramble = requestAnimationFrame(frame);
+      else node._scramble = null;
+    };
+    node._scramble = requestAnimationFrame(frame);
+  }
+
+  var ICONS = {
+    unlock: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 7.6-1.7"/></svg>',
+    cross: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+    clock: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>',
+    info: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'
+  };
+
+  return {
+    shuffle: shuffle, store: store, Deck: Deck, sound: sound, el: el,
+    bindMuteButton: bindMuteButton, startClock: startClock, scramble: scramble, ICONS: ICONS
+  };
 })();

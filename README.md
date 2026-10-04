@@ -45,7 +45,8 @@ Each round is randomly a logo or a URL challenge. The real option's side is also
 index.html          hub page
 cracker.html        Password Cracker
 realfake.html       Real or Fake
-css/style.css       shared theme (modern Mediterranean)
+css/style.css       shared theme (dark "instrument" look)
+fonts/              bundled Geist, Geist Mono and Doto fonts (SIL OFL), so it works offline
 js/common.js        shared helpers (shuffled decks, storage, sounds)
 js/vaults.js        all 76 vaults, verbatim, plus the flagged list
 js/cracker.js       Password Cracker logic
@@ -157,4 +158,4 @@ If an image file is missing, the game shows a red **MISSING IMAGE: <path>** box 
 
 ## URL pairs
 
-`js/urls.js` holds the 20 "Right" and 20 "Wrong" URLs verbatim from `logos.pdf`, paired by position in the two lists. They're displayed as text only and are never clickable.
+`js/urls.js` holds the 20 "Right" and 20 "Wrong" URLs verbatim from `logos.pdf`, paired by position in the two lists. They are shown the way links look in a document (blue and underlined), but they are text only and never open a website.
